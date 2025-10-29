@@ -57,14 +57,18 @@ def install(package_spec: str, workers: int, out: str | None) -> None:
     download_id = db.add_download(url, out_path, status="queued")
     click.echo(f"Download registered (id={download_id}) -> {out_path}")
 
-    # Choose downloader: prefer aria2c when available
+    # Choose downloader: prefer aria2c when available, but for local file:// URIs use Python fallback
     try:
-        if find_aria2c():
-            click.echo("Using aria2c if available...")
-            d = Aria2cDownloader()
-            res = d.download(url, out=out_dir, split=workers)
+        if isinstance(url, str) and url.startswith("file://"):
+            click.echo("Local file detected; using Python fallback to copy the file.")
+            res = python_fallback_download(url, out=out_dir)
         else:
-            raise Aria2cNotFound()
+            if find_aria2c():
+                click.echo("Using aria2c if available...")
+                d = Aria2cDownloader()
+                res = d.download(url, out=out_dir, split=workers)
+            else:
+                raise Aria2cNotFound()
     except Aria2cNotFound:
         click.echo(
             "aria2c not found, falling back to Python downloader (no multi-connection resume)."

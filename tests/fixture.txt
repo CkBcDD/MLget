@@ -1,0 +1,2 @@
+This is a small fixture file used by tests for mlget.
+Line two.
