@@ -208,3 +208,6 @@ __marimo__/
 
 # Design ideas
 .design/
+
+# GitHub Configuration Files
+.github/
